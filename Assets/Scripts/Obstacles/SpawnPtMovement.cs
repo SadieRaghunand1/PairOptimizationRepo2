@@ -33,12 +33,14 @@ public class SpawnPtMovement : MonoBehaviour
         ResetPosition();
     }
 
+    //Control movement
     void Movement()
     {
         transform.Translate(Vector3.back * Time.deltaTime * speed);
         
     }
 
+    //Once reaches behind player, move back to start
     void ResetPosition()
     {
         if(transform.position.z <= resetTrigger)
@@ -50,6 +52,7 @@ public class SpawnPtMovement : MonoBehaviour
                 children[i].ReturnToPool();
             }
 
+            //Add round to checkpoint count
             healChk.SetActive(false);
             rounds++;
             if(rounds >= numResetsChk)
@@ -59,24 +62,29 @@ public class SpawnPtMovement : MonoBehaviour
         }
     }
 
+    //Add obstacle to list
     public void AddChild(ObstacleMovement obst)
     {
         Debug.Log("Adding " + obst);
         children.Add(obst);
     }
 
+    //Remove obstacle when added back to pool
     public void RemoveChild(ObstacleMovement obst)
     {
         children.Remove(obst);
     }
 
+    //Control checkpoint behavior
     void CheckpointHandling()
     {
+        //Increase speed
         speed *= speedMod;
 
         numResetsChk = (int)Mathf.Ceil(chkInc * numResetsChk);
         gm.SetCheckPoint(numResetsChk);
 
+        //Reset rounds, release healing object
         rounds = 0;
         healChk.SetActive(true);
         //player.IncreaseHealth();

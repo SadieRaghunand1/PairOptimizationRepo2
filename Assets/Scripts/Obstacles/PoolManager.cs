@@ -20,8 +20,10 @@ public class PoolManager : MonoBehaviour
         StartCoroutine(TimeRelease());
     }
 
+    //Release cloud from object pool
     public void ReleaseFromPool()
     {
+        //Chhose a random cloud, if inactive then release
         int toRelease = Random.Range(0, obstacles.Length);
 
         if (obstacles[toRelease].GetIsActive())
@@ -29,12 +31,13 @@ public class PoolManager : MonoBehaviour
             return;
         }
 
+        //Set activity and speed
         ObstacleMovement thisObst = obstacles[toRelease];
         thisObst.gameObject.SetActive(true);
         thisObst.SetIsActive(true);
         thisObst.SetSpeed(Random.Range(minSpeed, maxSpeed));
         
-
+        //Choose a side/lane
         bool side = (Random.Range(0, 2) == 0) ? false : true;
         Transform chosen;
 
@@ -56,6 +59,7 @@ public class PoolManager : MonoBehaviour
 
     }
 
+    //Do consistent releases on timer
     IEnumerator TimeRelease()
     {
         yield return new WaitForSeconds(timeBwRelease);

@@ -31,11 +31,13 @@ public class ObstacleMovement : MonoBehaviour
     }
 
 
-
+    //Control movement on clouds
     private void Move()
     {
+        //Check if this cloud is active
         if(isActive)
         {
+            //Move based on lane direction
             if (moveLeft)
             {
                 moveDir = Vector3.right * speed;
@@ -56,11 +58,13 @@ public class ObstacleMovement : MonoBehaviour
         ReturnToPool(other);
     }
 
+    //When collide w/boundaries, return to object pool
     public void ReturnToPool(Collider other = null)
     {
-       
+       //Check for double collisions and make sure collided with correct barrier
         if( other != null && other.gameObject.layer == 7 && canDeactivate)
         {
+            //Set inactive, de-parent from lane
             isActive = false;
             Debug.Log(transform.parent + ", " + this.gameObject.name);
             if(transform.parent != null)
@@ -73,6 +77,7 @@ public class ObstacleMovement : MonoBehaviour
         }
     }
 
+    //Setters and getters
     public void SetMoveDirectionAndStartPoint(bool left, Transform startPos)
     {
         moveLeft = left;

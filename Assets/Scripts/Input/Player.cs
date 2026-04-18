@@ -41,6 +41,7 @@ public class Player : MonoBehaviour, PlayerControls.IPlayerActions
     #region input
     private void OnEnable()
     {
+        //Set all input
         if (controls != null)
             return;
 
@@ -49,24 +50,29 @@ public class Player : MonoBehaviour, PlayerControls.IPlayerActions
         controls.Player.Enable();
     }
 
+    //De-couple controls
     public void OnDisable()
     {
         controls.Player.Disable();
     }
 
 
+    //Control movement using input system
     public void OnMove(InputAction.CallbackContext context)
     {
         MoveComposite = context.ReadValue<Vector2>();
 
+        //Calculate movement vector
        movement = new Vector3(MoveComposite.x, 0, 0);
     }
 
+    //Jump
     public void OnJump(InputAction.CallbackContext context)
     {
         if (!context.performed || !isGrounded)
             return;
 
+        //Perform jump with rigidbody force physics
         OnJumpPerformed?.Invoke();
         Debug.Log("Jump!");
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
@@ -76,12 +82,13 @@ public class Player : MonoBehaviour, PlayerControls.IPlayerActions
     #region collision
     private void OnCollisionEnter(Collision collision)
     {
+        //Control grounded to prevent double jumps
         if(collision.gameObject.layer == 6)
         {
             ChangeIsGrounded();
         }
 
-        //Collide w obstacle
+        //Collide w obstacle, do damage
         if(collision.gameObject.layer == 8)
         {
             ObstacleMovement ob = collision.gameObject.GetComponent<ObstacleMovement>();
@@ -116,53 +123,68 @@ public class Player : MonoBehaviour, PlayerControls.IPlayerActions
         rb.AddForce(direction * speed);
     }
 
+    //Apply damage
     void GetDamaged(int damage, int ptsSub)
     {
+        //Check immunity
         if(!isImmune)
         {
+            //Check if this would kill player
             if (health - damage <= 0)
             {
+                //Wait to load the main menu
                 StartCoroutine(DelayDeath());
                 gUIManager.SetHealthImgs(true);
             }
             else
             {
+                //Reduce health
                 health -= damage;
                 gUIManager.SetHealthImgs(true);
             }
 
+            //Make immune for period of time after being damaged
             StartCoroutine(Immunity());
             gm.IncPts(-ptsSub);
         }
 
     }
 
+    //Add health
     public void IncreaseHealth()
     {
         health++;
         gUIManager.SetHealthImgs(false);
     }
 
+    //End game
     void Die()
     {
         gm.EndGame();
     }
 
+    //Delay death 
     IEnumerator DelayDeath()
     {
+        //Change player material
         GetComponent<Renderer>().material.color = Color.red;
+        //Stop cloud movements
         for (int i = 0; i < lanes.Length; i++)
         {
             lanes[i].SetSpeed(0);
         }
+        //Set score text color
         gUIManager.GetScoreText().color = Color.green;
 
+        //Die
         yield return new WaitForSeconds(3);
         Die();
     }
 
+    //Set immunity 
     IEnumerator Immunity()
     {
+        //Prevent player from being damaged multiple times in a couple frames
         isImmune = true;
         GetComponent<Renderer>().material.color = Color.yellow;
         yield return new WaitForSeconds(immunityTime);

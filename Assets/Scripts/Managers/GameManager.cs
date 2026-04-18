@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour
         StartCoroutine(DelayLoad());
     }
 
+    //Load next
     void LoadInNewScene(Scene scene, LoadSceneMode mode)
     {
         if (scene.buildIndex == 0)
@@ -42,7 +43,7 @@ public class GameManager : MonoBehaviour
         
     }
 
-
+    //Destroy this manager if loading back into the main menu and this is not the original game manager
     void CheckForExistingManager()
     {
         if (FindObjectsByType<GameManager>(FindObjectsSortMode.None).Length > 1 && !original)
@@ -55,7 +56,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-
+    //Reset high score if this round's is higher
     public void EndGame()
     {
         if(currentScore > highestScore)
@@ -63,15 +64,19 @@ public class GameManager : MonoBehaviour
             highestScore = currentScore;
             checkpointsReached = 0;
         }
+        //load main menu
         SceneManager.LoadScene(0);
     }
 
+    //Increase score
     public void IncPts(int pts)
     {
         currentScore += pts;
         uIManager.SetScoreText(currentScore);
     }
 
+
+    //Getters and setters
     public int GetHighScore()
     {
         return highestScore;
@@ -83,6 +88,7 @@ public class GameManager : MonoBehaviour
         uIManager.SetCheckPtText(checkpointsReached, next);
     }
 
+    //Delay loading in new scene
     IEnumerator DelayLoad()
     {
         yield return new WaitForEndOfFrame();

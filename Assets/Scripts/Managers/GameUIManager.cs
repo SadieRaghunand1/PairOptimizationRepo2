@@ -17,6 +17,8 @@ public class GameUIManager : MonoBehaviour
         SetCheckPtText(0, 3);
         SetScoreText(0);
     }
+
+    //Control the score text UI
     public void SetScoreText(int score)
     {
         scoreText.text = "Score = " + score.ToString();
@@ -27,12 +29,15 @@ public class GameUIManager : MonoBehaviour
         return scoreText;
     }
 
+    //Remove and add health indicators in UI as player gains and looses health
     public void SetHealthImgs(bool lose)
     {
+        //Lose health
         if(lose)
         {
             for (int i = healthImgs.Length - 1; i >= 0; i--) //out of bounds error
             {
+                //Try if any images are available to set inactive, if not catch
                 try
                 {
                     if (healthImgs[i] != null)
@@ -58,12 +63,14 @@ public class GameUIManager : MonoBehaviour
 
             }
         }
+        //Gain health
         else
         {
             for (int i = 0; i < healthImgs.Length; i++)
             {
                 if (!healthImgs[i].enabled)
                 {
+                    //Re-enable images when health gained
                     healthImgs[i].enabled = true;
                     return;
                 }
@@ -73,6 +80,7 @@ public class GameUIManager : MonoBehaviour
         
     }
 
+    //Set echackpoint text
     public void SetCheckPtText(int check, int next)
     {
         checkText.text = "Checkpoints = " + check;
