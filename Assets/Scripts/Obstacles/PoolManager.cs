@@ -1,0 +1,65 @@
+using System.Collections;
+using UnityEngine;
+
+public class PoolManager : MonoBehaviour
+{
+    [SerializeField] ObstacleMovement[] obstacles;
+    [SerializeField] float minSpeed, maxSpeed;
+    [SerializeField] private Transform[] leftPts;
+    [SerializeField] private Transform[] rightPts;
+    [SerializeField] private Transform leftParent;
+    [SerializeField] private SpawnPtMovement leftSc;
+    [SerializeField] private Transform rightParent;
+    [SerializeField] private SpawnPtMovement rightSc;
+
+    float timeBwRelease = 2; //Decrease as game goes on?
+
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
+    {
+        StartCoroutine(TimeRelease());
+    }
+
+    public void ReleaseFromPool()
+    {
+        int toRelease = Random.Range(0, obstacles.Length);
+
+        if (obstacles[toRelease].GetIsActive())
+        {
+            return;
+        }
+
+        ObstacleMovement thisObst = obstacles[toRelease];
+        thisObst.gameObject.SetActive(true);
+        thisObst.SetIsActive(true);
+        thisObst.SetSpeed(Random.Range(minSpeed, maxSpeed));
+        
+
+        bool side = (Random.Range(0, 2) == 0) ? false : true;
+        Transform chosen;
+
+        thisObst.GetComponent<Transform>().parent = (side) ? leftParent : rightParent;
+        if (side) //Left
+        {
+            chosen = leftPts[Random.Range(0, leftPts.Length)];
+            StartCoroutine(thisObst.SetCanDeactivate());
+            leftSc.AddChild(thisObst);
+        }
+        else //Right
+        {
+            chosen = rightPts[Random.Range(0, rightPts.Length)];
+            StartCoroutine(thisObst.SetCanDeactivate());
+            rightSc.AddChild(thisObst);
+        }
+
+        thisObst.SetMoveDirectionAndStartPoint(side, chosen);
+
+    }
+
+    IEnumerator TimeRelease()
+    {
+        yield return new WaitForSeconds(timeBwRelease);
+        ReleaseFromPool();
+        StartCoroutine(TimeRelease());
+    }
+}
