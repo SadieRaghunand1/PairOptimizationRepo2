@@ -13,7 +13,7 @@ public class PoolManager : MonoBehaviour
     [SerializeField] private SpawnPtMovement rightSc;
 
     float timeBwRelease = 2; //Decrease as game goes on?
-
+    private WaitForSeconds TimeReleaseWait = new WaitForSeconds(4f);
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -41,7 +41,7 @@ public class PoolManager : MonoBehaviour
         bool side = (Random.Range(0, 2) == 0) ? false : true;
         Transform chosen;
 
-        thisObst.GetComponent<Transform>().parent = (side) ? leftParent : rightParent;
+        thisObst.transform.parent = (side) ? leftParent : rightParent;
         if (side) //Left
         {
             chosen = leftPts[Random.Range(0, leftPts.Length)];
@@ -62,8 +62,12 @@ public class PoolManager : MonoBehaviour
     //Do consistent releases on timer
     IEnumerator TimeRelease()
     {
-        yield return new WaitForSeconds(timeBwRelease);
-        ReleaseFromPool();
-        StartCoroutine(TimeRelease());
+        while (true)
+        {
+            yield return TimeReleaseWait;
+            ReleaseFromPool();
+            StartCoroutine(TimeRelease());
+        }
+          
     }
 }
