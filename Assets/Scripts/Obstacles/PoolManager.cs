@@ -12,7 +12,7 @@ public class PoolManager : MonoBehaviour
     [SerializeField] private Transform rightParent;
     [SerializeField] private SpawnPtMovement rightSc;
 
-    float timeBwRelease = 2; //Decrease as game goes on?
+  //  float timeBwRelease = 2; //Decrease as game goes on?
     private WaitForSeconds TimeReleaseWait = new WaitForSeconds(4f);
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()

@@ -16,6 +16,7 @@ public class Player : MonoBehaviour, PlayerControls.IPlayerActions
 
     //Player components 
     public Rigidbody rb;
+    private Renderer rend; // CACHED: Renderer
 
     //Jump
     public float jumpForce;
@@ -31,11 +32,20 @@ public class Player : MonoBehaviour, PlayerControls.IPlayerActions
     bool isImmune;
     [SerializeField] private GameUIManager gUIManager;
     [SerializeField] private SpawnPtMovement[] lanes;
+    
+    // CACHED: WaitForSeconds to prevent GC allocation on every call
+    private WaitForSeconds immunityWait;
+    private WaitForSeconds deathWait;
 
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
+        rend = GetComponent<Renderer>();
         gm = FindAnyObjectByType<GameManager>();
+        
+        // Initialize cached wait times
+        immunityWait = new WaitForSeconds(immunityTime);
+        deathWait = new WaitForSeconds(3f);
     }
 
     #region input
@@ -56,14 +66,13 @@ public class Player : MonoBehaviour, PlayerControls.IPlayerActions
         controls.Player.Disable();
     }
 
-
     //Control movement using input system
     public void OnMove(InputAction.CallbackContext context)
     {
         MoveComposite = context.ReadValue<Vector2>();
 
         //Calculate movement vector
-       movement = new Vector3(MoveComposite.x, 0, 0);
+        movement = new Vector3(MoveComposite.x, 0, 0);
     }
 
     //Jump
@@ -91,11 +100,12 @@ public class Player : MonoBehaviour, PlayerControls.IPlayerActions
         //Collide w obstacle, do damage
         if(collision.gameObject.layer == 8)
         {
-            ObstacleMovement ob = collision.gameObject.GetComponent<ObstacleMovement>();
-            GetDamaged(ob.GetDamage(), ob.GetPts());
+            // OPTIMIZATION: TryGetComponent is faster and safer
+            if (collision.gameObject.TryGetComponent(out ObstacleMovement ob))
+            {
+                GetDamaged(ob.GetDamage(), ob.GetPts());
+            }
         }
-
-        
     }
 
     private void OnCollisionExit(Collision collision)
@@ -116,7 +126,6 @@ public class Player : MonoBehaviour, PlayerControls.IPlayerActions
     {
         moveCharacter(movement);
     }
-
 
     void moveCharacter(Vector3 direction)
     {
@@ -147,7 +156,6 @@ public class Player : MonoBehaviour, PlayerControls.IPlayerActions
             StartCoroutine(Immunity());
             gm.IncPts(-ptsSub);
         }
-
     }
 
     //Add health
@@ -167,17 +175,19 @@ public class Player : MonoBehaviour, PlayerControls.IPlayerActions
     IEnumerator DelayDeath()
     {
         //Change player material
-        GetComponent<Renderer>().material.color = Color.red;
+        rend.material.color = Color.red;
+        
         //Stop cloud movements
         for (int i = 0; i < lanes.Length; i++)
         {
             lanes[i].SetSpeed(0);
         }
+        
         //Set score text color
         gUIManager.GetScoreText().color = Color.green;
 
         //Die
-        yield return new WaitForSeconds(3);
+        yield return deathWait;
         Die();
     }
 
@@ -186,11 +196,11 @@ public class Player : MonoBehaviour, PlayerControls.IPlayerActions
     {
         //Prevent player from being damaged multiple times in a couple frames
         isImmune = true;
-        GetComponent<Renderer>().material.color = Color.yellow;
-        yield return new WaitForSeconds(immunityTime);
+        rend.material.color = Color.yellow;
+        
+        yield return immunityWait;
+        
         isImmune = false;
-        GetComponent<Renderer>().material.color = Color.green;
+        rend.material.color = Color.green;
     }
-
-
 }
