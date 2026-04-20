@@ -7,7 +7,7 @@ public class SpawnPtMovement : MonoBehaviour
     GameManager gm;
     [SerializeField] private Player player;
 
-    float speed = 10;
+    [SerializeField] float speed = 10;
     [SerializeField] private float resetTrigger;
     [SerializeField] private float resetPos;
 
@@ -16,7 +16,8 @@ public class SpawnPtMovement : MonoBehaviour
     [SerializeField] private GameObject healChk;
 
     //Increase difficulty over time
-    float speedMod = 1.5f;
+    float speedMod = 1.1f;
+    float maxSpeed = 25;
     int rounds = 0;
     int numResetsChk = 3; //number of resets needed for next checkpoint
     float chkInc = 3.5f; //Amount above num increases by, multiplied and rounded to int
@@ -80,6 +81,8 @@ public class SpawnPtMovement : MonoBehaviour
     {
         //Increase speed
         speed *= speedMod;
+        if(speed > maxSpeed)
+            speed = maxSpeed;
 
         numResetsChk = (int)Mathf.Ceil(chkInc * numResetsChk);
         gm.SetCheckPoint(numResetsChk);
