@@ -11,7 +11,10 @@ public class GameUIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI checkText;
     [SerializeField] private TextMeshProUGUI nextChkText;
-    
+
+    // Cache the Wait object to prevent garbage allocation every time it's called
+    private WaitForSeconds checkpointWait = new WaitForSeconds(3f);
+
     private void Start()
     {
         SetCheckPtText(0, 3);
@@ -21,7 +24,8 @@ public class GameUIManager : MonoBehaviour
     //Control the score text UI
     public void SetScoreText(int score)
     {
-        scoreText.text = "Score = " + score.ToString();
+        // SetText with parameters avoids garbage collection allocations
+        scoreText.SetText("Score = {0}", score);
     }
 
     public TextMeshProUGUI GetScoreText()
@@ -83,8 +87,9 @@ public class GameUIManager : MonoBehaviour
     //Set echackpoint text
     public void SetCheckPtText(int check, int next)
     {
-        checkText.text = "Checkpoints = " + check;
-        nextChkText.text = "Next Checkpoint: " + next;
+        // Avoids GC allocations
+        checkText.SetText("Checkpoints = {0}", check);
+        nextChkText.SetText("Next Checkpoint: {0}", next);
         StartCoroutine(SetChkPtColor());
 
     }
@@ -92,7 +97,7 @@ public class GameUIManager : MonoBehaviour
     IEnumerator SetChkPtColor()
     {
         checkText.color = Color.cyan;
-        yield return new WaitForSeconds(3);
+        yield return checkpointWait;
         checkText.color = Color.white;
     }
 
